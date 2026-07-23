@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WriteGen AI - Modern AI Content Generator</title>
+    <meta name="description" content="A premium full-stack AI content generation platform powered by Google Gemini API. Generate content, summarize text, draft emails, and rewrite articles instantly with real-time streaming response.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Background glowing shapes for glassmorphism -->
+    <div class="glow-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar for History & Theme -->
+        <aside class="sidebar-panel glass-card" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <h2>WriteGen<span>AI</span></h2>
+                </div>
+                <button class="close-sidebar-btn" id="closeSidebar" aria-label="Close sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <div class="section-title">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Generation History</h3>
+                        <span class="history-count" id="historyCount">0</span>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items populated dynamically -->
+                        <div class="empty-history">
+                            <i class="fa-solid fa-box-open"></i>
+                            <p>No history items yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="themeToggle" class="theme-btn" aria-label="Toggle light and dark mode">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="workspace-area">
+            <header class="workspace-header">
+                <button class="menu-toggle-btn" id="menuToggle" aria-label="Toggle history menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-titles">
+                    <h1>Craft Content with Intelligence</h1>
+                    <p>Leverage state-of-the-art AI to write, rewrite, summarize, or compose emails.</p>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <nav class="tabs-nav glass-card" aria-label="Tool selection">
+                <button class="tab-btn active" data-tab="generate" id="tab-generate">
+                    <i class="fa-solid fa-pen-nib"></i>
+                    <span>Generate Content</span>
+                </button>
+                <button class="tab-btn" data-tab="summarize" id="tab-summarize">
+                    <i class="fa-solid fa-compress"></i>
+                    <span>Summarize Text</span>
+                </button>
+                <button class="tab-btn" data-tab="email" id="tab-email">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>Email Generator</span>
+                </button>
+                <button class="tab-btn" data-tab="rewrite" id="tab-rewrite">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Rewrite Text</span>
+                </button>
+            </nav>
+
+            <!-- Forms Workspace Grid -->
+            <div class="workspace-grid">
+                <!-- Left panel: Form Controls -->
+                <section class="control-panel glass-card">
+                    
+                    <!-- Tab Content: Generate Content -->
+                    <form id="form-generate" class="tab-form active">
+                        <div class="form-group">
+                            <label for="gen-prompt">Topic / Content Description</label>
+                            <textarea id="gen-prompt" placeholder="What would you like the AI to write about? E.g., 'The Future of Renewable Energy in Smart Cities'" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gen-tone">Tone of Voice</label>
+                                <select id="gen-tone">
+                                    <option value="Professional">👔 Professional</option>
+                                    <option value="Casual">☕ Casual</option>
+                                    <option value="Creative" selected>🎨 Creative</option>
+                                    <option value="Academic">🎓 Academic</option>
+                                    <option value="Persuasive">📢 Persuasive</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="gen-length">Length</label>
+                                <select id="gen-length">
+                                    <option value="Short">⚡ Short (~150 words)</option>
+                                    <option value="Medium" selected>📝 Medium (~400 words)</option>
+                                    <option value="Long">📚 Long (~800 words)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gen-keywords">Keywords (Comma separated, optional)</label>
+                            <input type="text" id="gen-keywords" placeholder="e.g., sustainability, solar power, IoT">
+                        </div>
+                        <button type="submit" class="submit-btn" id="submit-gen-btn">
+                            <span>Create Content</span>
+                            <i class="fa-solid fa-sparkles"></i>
+                        </button>
+                    </form>
+
+                    <!-- Tab Content: Summarize Text -->
+                    <form id="form-summarize" class="tab-form">
+                        <div class="form-group">
+                            <label for="sum-text">Source Text</label>
+                            <textarea id="sum-text" placeholder="Paste the long article, post or document you want to summarize here..." required></textarea>
+                            <div class="char-counter"><span id="sum-count">0</span> characters</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sum-style">Summary Style</label>
+                            <select id="sum-style">
+                                <option value="Bullet Points" selected>📌 Bullet Points (Key highlights)</option>
+                                <option value="Detailed">📖 Detailed Summary (Structured paragraphs)</option>
+                                <option value="Key Takeaway">💡 Key Takeaways (One-liner core message)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submit-sum-btn">
+                            <span>Summarize Now</span>
+                            <i class="fa-solid fa-compress"></i>
+                        </button>
+                    </form>
+
+                    <!-- Tab Content: Email Generator -->
+                    <form id="form-email" class="tab-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email-sender">Sender Name / Role</label>
+                                <input type="text" id="email-sender" placeholder="Your name or company" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email-recipient">Recipient Name / Role</label>
+                                <input type="text" id="email-recipient" placeholder="Recipient's name/role" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email-purpose">Purpose of Email</label>
+                            <input type="text" id="email-purpose" placeholder="e.g., Schedule a follow-up demo, request project update" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email-points">Key Points to Cover (Enter one key point per line)</label>
+                            <textarea id="email-points" placeholder="Key Point 1: Introduce the team&#10;Key Point 2: Request meeting on Tuesday at 3 PM&#10;Key Point 3: Attach product catalog" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="email-tone">Email Tone</label>
+                            <select id="email-tone">
+                                <option value="Professional" selected>👔 Professional</option>
+                                <option value="Friendly">😊 Friendly / Warm</option>
+                                <option value="Urgent">🚨 Urgent / Action Required</option>
+                                <option value="Casual">☕ Casual</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submit-email-btn">
+                            <span>Draft Email</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+
+                    <!-- Tab Content: Rewrite Text -->
+                    <form id="form-rewrite" class="tab-form">
+                        <div class="form-group">
+                            <label for="rew-text">Original Text</label>
+                            <textarea id="rew-text" placeholder="Paste the text you want to rewrite or improve..." required></textarea>
+                            <div class="char-counter"><span id="rew-count">0</span> characters</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rew-style">Rewrite Style</label>
+                            <select id="rew-style">
+                                <option value="Professionalize" selected>👔 Professional (Formal tone)</option>
+                                <option value="Simplify">🧩 Simplify (Easier to read)</option>
+                                <option value="Expand">📈 Expand (Elaborate with details)</option>
+                                <option value="Casual">☕ Casual & Friendly</option>
+                                <option value="Persuasive">📢 Persuasive & Convincing</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submit-rew-btn">
+                            <span>Rewrite Text</span>
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </form>
+
+                </section>
+
+                <!-- Right panel: Live Output & Controls -->
+                <section class="output-panel glass-card">
+                    <div class="output-header">
+                        <div class="output-title">
+                            <i class="fa-solid fa-terminal"></i>
+                            <h3>Generated Output</h3>
+                        </div>
+                        <div class="output-actions">
+                            <button id="btnCopy" class="action-btn" title="Copy to clipboard" disabled>
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                            <button id="btnDownload" class="action-btn" title="Download as TXT" disabled>
+                                <i class="fa-solid fa-download"></i>
+                                <span>Download</span>
+                            </button>
+                            <button id="btnClear" class="action-btn" title="Clear text">
+                                <i class="fa-regular fa-trash-can"></i>
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="output-display-container">
+                        <!-- Loading spinner -->
+                        <div class="loading-overlay" id="loadingOverlay">
+                            <div class="spinner">
+                                <div class="double-bounce1"></div>
+                                <div class="double-bounce2"></div>
+                            </div>
+                            <p>Connecting to AI Mind...</p>
+                        </div>
+
+                        <!-- Main text display area -->
+                        <div class="output-text-area" id="outputText" placeholder="AI-generated content will stream here in real-time..."></div>
+                    </div>
+                    
+                    <div class="output-footer">
+                        <div class="generation-status" id="genStatus">Ready to generate</div>
+                        <div class="word-char-count" id="wordCount">0 words | 0 characters</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification system -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

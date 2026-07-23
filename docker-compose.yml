@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: writegen-app
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=${MONGODB_DB:-writegen_ai}
+      - PORT=8000
+    depends_on:
+      - mongodb
+    restart: always
+
+  mongodb:
+    image: mongo:latest
+    container_name: writegen-db-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+
+volumes:
+  mongodb_data:
