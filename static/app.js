@@ -4,10 +4,8 @@
 
 console.log("JS file is loaded");
 document.addEventListener('DOMContentLoaded', () => {
-    // API Configuration: Use custom Render URL if running in production (Vercel), otherwise fallback to empty string for localhost.
-    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? '' 
-        : 'https://writegen-backend-render.onrender.com'; // CHANGE THIS to your actual Render service URL once deployed!
+    // API Configuration: Since frontend and backend are hosted together on Render, use relative paths ('').
+    const API_BASE_URL = '';
 
     // DOM Elements - Navigation & Sidebar
     const tabButtons = document.querySelectorAll('.tab-btn');
