@@ -1,182 +1,269 @@
-# WriteGen AI - Modern Full-Stack AI Content Generation Web Application
+# 🪄 WriteGen AI
 
-WriteGen AI is a premium, single-page, full-stack AI content assistant. It enables users to instantly generate high-quality text, summarize long documents, draft emails, and rewrite existing articles. The application features a stunning glassmorphism user interface supporting light/dark modes, custom scrollbars, and fluid animations, with real-time text-streaming (typing effect) directly from Google's Gemini API.
+![WriteGen AI Banner](https://img.shields.io/badge/WriteGen%20AI-Intelligent%20Content%20Generation-blue?style=for-the-badge&logo=googlebard)
 
----
+> A modern, full-stack AI content generation platform powered by the Google Gemini API.
 
-## 🛠️ Tech Stack & Dependencies
+## 📖 Project Overview
+WriteGen AI is an intelligent content creation workspace that helps users seamlessly generate, summarize, format, and rewrite text. Built with a lightning-fast FastAPI backend and a sleek, glassmorphic vanilla JavaScript frontend, it streams AI responses in real-time. With full user authentication and MongoDB integration, WriteGen AI securely saves your generation history so you never lose a great idea.
 
-### Frontend
-- **HTML5 & CSS3 (Vanilla)**: High-end custom styling utilizing backdrop-filters, custom glowing shapes, micro-animations, and full responsiveness.
-- **JavaScript (ES6, Vanilla)**: Handles real-time API streaming, state management, asynchronous data fetching, dynamic layout updates, and notifications.
-- **FontAwesome (v6.4.0)**: Used for modern, clean iconography.
-- **Google Fonts (Outfit & Plus Jakarta Sans)**: Premium modern typography.
-
-### Backend
-- **FastAPI (v0.100.0+)**: Highly performant ASGI framework serving as the main API layer.
-- **Uvicorn (v0.22.0+)**: Production-grade ASGI web server implementation.
-- **Motor (v3.2.0+)**: Asynchronous MongoDB driver for Python, enabling non-blocking database queries.
-- **Google Generative AI SDK (v0.7.0+)**: Integrates with the `gemini-3.5-flash` model for content generation.
-- **Pydantic (v2.0.0+)**: Enforces runtime validation and type consistency for request payloads and database models.
-- **Python-dotenv (v1.0.0+)**: Simplifies configuration loading from `.env` files.
+## ✨ Features
+- **Real-Time AI Streaming**: Watch your content generate word-by-word instantly.
+- **Content Generation**: Write creative, professional, or academic content based on prompts, keywords, and tone.
+- **Text Summarizer**: Condense long articles into bullet points, detailed paragraphs, or key takeaways.
+- **Email Drafter**: Instantly compose professional or casual emails based on a sender, recipient, and key points.
+- **Text Rewriter**: Improve your drafts by simplifying, expanding, or making them more persuasive.
+- **User Authentication**: Secure JWT-based login and registration system.
+- **History Tracking**: Automatically saves all generations to MongoDB for logged-in users.
+- **Responsive Design**: Beautiful dark-mode UI with glassmorphism aesthetics.
+- **Export Options**: Copy to clipboard or download generated content as `.txt` files.
 
 ---
 
-## 🌟 Key Features
-
-1. **Four Content Generation Tools (Tabs)**:
-   - **Generate Content**: Craft articles, ideas, or essays matching selected tones (*Creative, Professional, Academic, Casual, Persuasive*) and lengths (*Short, Medium, Long*) with optional keyword inputs.
-   - **Summarize Text**: Convert long texts into concise formats (*Bullet points, Detailed summaries, or core Key Takeaways*).
-   - **Email Generator**: Input the recipient, sender, purpose, and key points to instantly write formatted business or casual drafts.
-   - **Rewrite Text**: Adapt or improve any text style (*Simplify, Professionalize, Expand, Casual, Persuasive*).
-2. **Real-time AI Streaming**: Employs backend generator yielding chunks immediately as they arrive from Gemini, creating a seamless typing effect loop in the frontend.
-3. **Interactive Stream Interruption**: Users can abort an ongoing generation stream at any time by clicking the **Clear** button, which signals the frontend reader to cancel the stream.
-4. **Theme Customization**: Responsive dark and light mode toggle with state persisted in the browser's `LocalStorage`.
-5. **Interactive Client-side Metrics**: Live character limits and counters on text inputs to help users gauge input length.
-6. **Robust History Synchronization**: Saves prompt history and responses asynchronously, allowing users to view past prompts, delete records, or click on a card to automatically load past options and responses back into the workspace.
-7. **Graceful Failbacks**: Automatically runs in a mock **Demo Mode** if no Google Gemini API Key is configured, simulating response streams.
+## 🛠️ Tech Stack
+| Tier | Technologies |
+|------|--------------|
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript, FontAwesome, Google Fonts |
+| **Backend** | Python 3.10+, FastAPI, Uvicorn |
+| **Database** | MongoDB Atlas, Motor (Async Python Driver) |
+| **AI Integration** | Google Generative AI SDK (`google-generativeai`), Gemini Models |
+| **Authentication** | JWT (`PyJWT`), Password Hashing (`passlib[bcrypt]`) |
+| **Environment** | `python-dotenv` |
 
 ---
 
-## 🏗️ Project Architecture
+## 📁 Project Structure
 
-```
-d:\ibm project\
+```text
+WriteGen_AI/
 ├── backend/
-│   ├── __init__.py
-│   ├── main.py          # FastAPI app launcher, CORS middleware, static folder mounting
-│   ├── routes.py        # API routes (generating content, summaries, emails, rewrites, history)
-│   ├── gemini.py        # Google Generative AI client config, templates, & generators
-│   ├── database.py      # Async MongoDB database client using Motor
-│   ├── models.py        # Pydantic schemas validating request payload and history data
-│   └── .env             # Environment variables (configured during setup)
+│   ├── main.py        # Application entry point, server config, and lifespan events
+│   ├── routes.py      # All REST API endpoints (Auth, Generate, History)
+│   ├── database.py    # MongoDB connection setup and collection getters
+│   ├── auth.py        # JWT generation, token verification, and password hashing
+│   ├── gemini.py      # Google Gemini API configuration, prompt building, and streaming
+│   └── models.py      # Pydantic schemas for data validation (Requests & Responses)
 ├── static/
-│   ├── index.html       # Single-page application structure
-│   ├── style.css        # Premium CSS rules (dark/light themes, layouts, animations)
-│   └── app.js           # Frontend client (theme controller, stream readers, forms, history sync)
-├── Dockerfile           # Optimized single-stage Python 3.11-slim container setup
-├── docker-compose.yml   # Multi-container local orchestration (App + MongoDB database)
-├── requirements.txt     # Python backend dependencies
-└── README.md            # Documentation guide
+│   ├── index.html     # Main user interface (SPA)
+│   ├── style.css      # Styling, layout, and animations
+│   └── app.js         # Frontend logic, event listeners, and API fetch calls
+├── requirements.txt   # Python dependencies
+├── .env.example       # Example environment variables file
+└── README.md          # Project documentation (You are here)
+```
+
+### Architecture Breakdown
+- **`backend/main.py`**: Initializes the FastAPI app, configures CORS, handles database connection lifespans, and mounts the static files and API router.
+- **`backend/routes.py`**: The core router containing every API endpoint. It links the frontend HTTP requests to the database and Gemini models.
+- **`backend/database.py`**: Manages the asynchronous MongoDB connection using Motor. Exports helper functions to fetch collections.
+- **`backend/auth.py`**: Handles security. Uses `passlib` to hash passwords and `PyJWT` to encode/decode access tokens for protected routes.
+- **`backend/gemini.py`**: Houses the logic for communicating with Google's Generative AI. It constructs strict prompts based on user options and yields asynchronous streaming responses.
+- **`backend/models.py`**: Uses Pydantic to strictly type incoming JSON request bodies (e.g., `UserCreate`, `GenerateRequest`) and outgoing responses.
+- **`static/`**: Contains the frontend Single Page Application (SPA). The HTML provides the structure, CSS provides the dark glassmorphic theme, and JS orchestrates the interactive DOM updates and API calls.
+- **`.env`**: Stores sensitive credentials outside of source control.
+
+---
+
+## ⚙️ Prerequisites
+Ensure you have the following installed on your system before proceeding:
+- **Python 3.10** or higher
+- **pip** (Python package installer)
+- A **Google Gemini API Key**
+- A **MongoDB Atlas** account and cluster
+
+---
+
+## 🚀 Installation
+
+Follow these steps exactly to set up the project locally.
+
+**1. Clone the repository and navigate into it**
+```bash
+git clone <your-repo-url>
+cd WriteGen_AI
+```
+
+**2. Create a virtual environment**
+```bash
+python -m venv venv
+```
+
+**3. Activate the virtual environment**
+* **Windows:**
+  ```cmd
+  venv\Scripts\activate
+  ```
+* **Mac/Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+**4. Install dependencies**
+```bash
+pip install -r requirements.txt
 ```
 
 ---
 
-## 🔌 API Architecture & Endpoints
+## 🔐 Environment Variables (.env)
 
-All endpoints are built using FastAPI and enforce structured data validation via Pydantic schemas:
+Create a file named `.env` in the root directory (next to `requirements.txt`). You can use `.env.example` as a template.
 
-| Endpoint | Method | Description | Request Model | Response Format |
-|---|---|---|---|---|
-| `/api/health` | `GET` | Health check verifying database and application connectivity status | None | JSON |
-| `/api/generate/content` | `POST` | Streams text output for standard content generation | `GenerateRequest` | Text Stream (plain/text) |
-| `/api/generate/summarize` | `POST` | Streams text summary of a longer input document | `SummarizeRequest` | Text Stream (plain/text) |
-| `/api/generate/email` | `POST` | Streams structured email draft with sender, recipient details | `EmailRequest` | Text Stream (plain/text) |
-| `/api/generate/rewrite` | `POST` | Streams rewritten text matching selected tone/complexity style | `RewriteRequest` | Text Stream (plain/text) |
-| `/api/history` | `GET` | Retrieves the 30 most recent prompt and response history items | None | JSON array of `HistoryItem` |
-| `/api/history/{item_id}` | `DELETE` | Deletes a generation history item by database ID | None | JSON |
-
----
-
-## 💾 Database Schema (MongoDB)
-
-History records are stored in MongoDB under the `history` collection inside the `writegen_ai` database. The database records map directly to the Pydantic `HistoryItem` schema:
-
-```json
-{
-  "_id": "ObjectId",
-  "prompt": "String (Main prompt or raw source text)",
-  "type": "String ('generate' | 'summarize' | 'email' | 'rewrite')",
-  "options": {
-    "tone": "String (Optional)",
-    "length": "String (Optional)",
-    "keywords": ["String (Optional)"],
-    "style": "String (Optional)",
-    "text_length": "Number (Optional)",
-    "recipient": "String (Optional)",
-    "sender": "String (Optional)",
-    "purpose": "String (Optional)",
-    "key_points": ["String (Optional)"]
-  },
-  "response": "String (Full generated AI response text)",
-  "timestamp": "String (ISO format datetime, e.g. '2026-07-23T12:00:15.000Z')"
-}
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DB=writegen_db
+PORT=8000
+JWT_SECRET_KEY=your_super_secret_jwt_key_here
+JWT_ALGORITHM=HS256
 ```
 
----
-
-## ⚙️ Quick Start with Docker (Recommended)
-
-To run the application and database together in minutes:
-
-1. **Clone or navigate** to the project directory:
-   ```bash
-   cd "d:\ibm project"
-   ```
-2. **Configure your API Key**:
-   Open the `.env` file and insert your Gemini API Key:
-   ```env
-   GEMINI_API_KEY=your_actual_gemini_api_key_here
-   ```
-   *Note: If left blank, the app will run in mock Demo Mode.*
-3. **Launch the Docker Compose pipeline**:
-   ```bash
-   docker-compose up --build
-   ```
-4. Open your browser and navigate to: [http://localhost:8000](http://localhost:8000)
+### Variable Breakdown:
+- **`GEMINI_API_KEY`**: Your secret key to access Google's Gemini models.
+- **`MONGODB_URI`**: The connection string provided by MongoDB Atlas. It includes your username, password, and cluster address.
+- **`MONGODB_DB`**: The name of the database that WriteGen AI will create and use (e.g., `writegen_db`).
+- **`PORT`**: The port number on which the FastAPI server will run (default is `8000`).
+- **`JWT_SECRET_KEY`**: A long, random, and secure string used to digitally sign authentication tokens. (e.g., generate one via `openssl rand -hex 32`).
+- **`JWT_ALGORITHM`**: The cryptographic algorithm used for signing the JWT (leave as `HS256`).
 
 ---
 
-## 🐍 Manual Local Installation
+## 🔑 How to Obtain API Keys
 
-If you prefer to run the backend Python server and a local MongoDB instance manually:
+### Google Gemini API Key
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Sign in with your Google Account.
+3. Click **"Create API key"**.
+4. Copy the key and paste it into your `.env` file under `GEMINI_API_KEY`.
 
-### Prerequisites
-- Python 3.10 or 3.11 installed.
-- A running MongoDB server at `mongodb://localhost:27017` (or change `MONGODB_URI` in `.env`).
-
-### Setup Instructions
-
-1. **Navigate to the workspace root**:
-   ```bash
-   cd "d:\ibm project"
-   ```
-2. **Create and activate a virtual environment**:
-   ```bash
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-3. **Install the dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. **Setup environment configurations**:
-   Ensure you copy `.env.example` to `.env` and fill in the values:
-   ```bash
-   cp .env.example .env
-   ```
-   In `.env`, configure:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key
-   MONGODB_URI=mongodb://localhost:27017
-   MONGODB_DB=writegen_ai
-   PORT=8000
-   ```
-5. **Run the FastAPI server**:
-   ```bash
-   python -m backend.main
-   ```
-6. Visit [http://localhost:8000](http://localhost:8000) in your web browser.
+### MongoDB Atlas Connection String
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and sign in/register.
+2. Create a new Cluster (the free tier works perfectly).
+3. Under **Database Access**, create a user with a username and password.
+4. Under **Network Access**, click **Add IP Address** and choose **Allow Access From Anywhere** (`0.0.0.0/0`) for development.
+5. Go to **Database** > **Connect** > **Drivers**.
+6. Copy the connection string. Replace `<username>` and `<password>` with the database user credentials you created in Step 3. Paste this into your `.env` file under `MONGODB_URI`.
 
 ---
 
-## 🔑 How to Get a Google Gemini API Key
+## 💻 Running the Backend & Frontend
 
-1. Go to [Google AI Studio](https://aistudio.google.com/).
-2. Log in using your Google Account.
-3. Click on the **Get API Key** button in the top left.
-4. Click **Create API Key**, choose a project, and copy the generated key.
-5. Paste the key into the `GEMINI_API_KEY` field in your `.env` file.
+WriteGen AI is configured so that the FastAPI backend automatically serves the frontend static files. You only need to run one command!
+
+**Run the Server:**
+```bash
+python -m backend.main
+```
+
+You should see output indicating that Uvicorn is running and that MongoDB has successfully connected.
+
+**Access the App:**
+Open your web browser and navigate to:
+👉 **[http://localhost:8000](http://localhost:8000)**
+
+*(Note: The API documentation is automatically generated and available at [http://localhost:8000/docs](http://localhost:8000/docs))*
+
+---
+
+## 📡 API Endpoints
+
+### 🟢 General Endpoints
+| Method | URL | Purpose |
+|--------|-----|---------|
+| `GET` | `/api/health` | Verifies the server is running and the database is connected. |
+
+### 🔐 Authentication Endpoints
+| Method | URL | Request Body (JSON) | Response (JSON) | Purpose |
+|--------|-----|----------------------|-----------------|---------|
+| `POST` | `/api/auth/register` | `{ "email": "...", "password": "...", "name": "..." }` | `{ "access_token": "...", "token_type": "bearer", "name": "..." }` | Creates a new user account and returns a JWT. |
+| `POST` | `/api/auth/login` | `{ "email": "...", "password": "..." }` | `{ "access_token": "...", "token_type": "bearer", "name": "..." }` | Authenticates a user and returns a JWT. |
+
+### 🤖 Generation Endpoints
+*(Note: All generation endpoints return a `text/plain` streaming response using HTTP chunked transfer encoding.)*
+
+| Method | URL | Request Body (JSON) | Purpose |
+|--------|-----|----------------------|---------|
+| `POST` | `/api/generate/content` | `{ "prompt": "...", "tone": "Creative", "length": "Medium", "keywords": ["ai"] }` | Streams general content generation based on prompt constraints. |
+| `POST` | `/api/generate/summarize` | `{ "text": "...", "style": "Bullet Points" }` | Streams a summarization of the provided long-form text. |
+| `POST` | `/api/generate/email` | `{ "recipient": "...", "sender": "...", "purpose": "...", "key_points": ["..."], "tone": "Professional" }` | Streams an email draft. |
+| `POST` | `/api/generate/rewrite` | `{ "text": "...", "style": "Simplify" }` | Streams a rewritten version of the provided text. |
+
+### 📜 History Endpoints
+*(Note: Require `Authorization: Bearer <token>` header)*
+
+| Method | URL | Response | Purpose |
+|--------|-----|----------|---------|
+| `GET` | `/api/history` | Array of `HistoryItem` objects | Fetches the logged-in user's past generations, sorted chronologically. |
+| `DELETE`| `/api/history/{item_id}`| `{ "status": "success", "message": "..." }` | Deletes a specific history item by its MongoDB `_id`. |
+
+---
+
+## 🗄️ Database Collections
+
+The MongoDB database (`writegen_db`) contains two primary collections:
+1. **`users`**: Stores user account information (Name, Email, Hashed Passwords).
+2. **`history`**: Stores generation records (User ID, Prompt, Metadata Options, Generated Text, Timestamp).
+
+---
+
+## 💡 Demo Workflow / Usage Guide
+
+1. **Launch**: Start the server and visit `http://localhost:8000`.
+2. **Authenticate**: Click **Log In / Register** in the sidebar. Create an account.
+3. **Select a Tool**: Use the top tabs to choose between *Generate Content*, *Summarize Text*, *Email Generator*, or *Rewrite Text*.
+4. **Configure**: Fill out the required text fields and adjust the dropdown menus (e.g., Tone, Length, Style).
+5. **Generate**: Click the submit button. Watch the right-hand panel as the AI streams the response directly to your screen in real-time.
+6. **Export**: Click **Copy** or **Download** in the output panel to save your work.
+7. **History**: Open the sidebar (hamburger menu on mobile) to view and reload your past generations.
+
+---
+
+## 🛑 Error Handling & Troubleshooting
+
+If you run into issues, check the terminal output where you ran `python -m backend.main`.
+
+| Issue | Cause & Solution |
+|-------|------------------|
+| **MongoDB connection errors** (`ServerSelectionTimeoutError`) | The `MONGODB_URI` is incorrect, or your current IP address is not whitelisted in MongoDB Atlas Network Access. |
+| **Invalid API key** (`400 Bad Request` from Gemini) | Your `GEMINI_API_KEY` is missing or invalid. Verify it in your `.env` file. |
+| **429 Quota Exceeded** | You have hit the rate limit for the free tier of the Gemini API. Wait a few minutes and try again. |
+| **503 Model Busy** | Google's Gemini servers are currently overloaded. Try again in a few seconds. |
+| **JWT module missing** | You installed `jwt` instead of `PyJWT`. Run: `pip uninstall jwt` and then `pip install PyJWT`. |
+| **bcrypt version issues** | Passlib might complain about missing bcrypt. Ensure you install using `pip install passlib[bcrypt]`. |
+| **Environment variables not loading** | The backend cannot find the `.env` file. Ensure it is located in the exact root folder of `WriteGen_AI`. |
+
+---
+
+## 📦 Dependencies
+
+Major dependencies defined in `requirements.txt`:
+- `fastapi` & `uvicorn` (Web framework and ASGI server)
+- `google-generativeai` (Google's official Gemini Python SDK)
+- `motor` (Asynchronous MongoDB driver)
+- `passlib[bcrypt]` (Password hashing)
+- `PyJWT` (JSON Web Token generation)
+- `python-dotenv` (Environment variable management)
+- `pydantic` (Data validation)
+
+---
+
+## 🚀 Future Improvements
+- **Document Uploads**: Allow users to upload PDF or DOCX files for summarization.
+- **Export to PDF**: Add functionality to download generated content directly as beautifully formatted PDFs.
+- **Prompt Templates**: Allow users to save their favorite generation settings as reusable templates.
+- **Dark/Light Mode Persistence**: Save the user's theme preference to their profile in the database.
+
+---
+
+## 🤝 Contributing
+Contributions are welcome!
+1. Fork the repository
+2. Create a Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.

@@ -4,8 +4,14 @@ import logging
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from the root .env file
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+load_dotenv(dotenv_path=env_path)
+print("=" * 50)
+print("ENV PATH:", env_path)
+print("FILE EXISTS:", os.path.exists(env_path))
+print("GEMINI:", os.getenv("GEMINI_API_KEY"))
+print("=" * 50)
 
 logger = logging.getLogger("writegen-gemini")
 
@@ -19,7 +25,7 @@ else:
     IS_DEMO_MODE = False
 
 # We use the fast and standard model gemini-3.5-flash for general tasks
-MODEL_NAME = "gemini-3.5-flash"
+MODEL_NAME = "models/gemini-3.6-flash"
 
 async def mock_stream_generator(prompt: str):
     """Simulates a typing effect stream for testing without an API key."""

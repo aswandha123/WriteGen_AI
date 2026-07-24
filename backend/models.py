@@ -2,6 +2,20 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
+class UserCreate(BaseModel):
+    email: str = Field(..., description="User email address")
+    password: str = Field(..., description="User password")
+    name: str = Field(..., description="User full name")
+
+class UserLogin(BaseModel):
+    email: str = Field(..., description="User email address")
+    password: str = Field(..., description="User password")
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    name: str
+
 class GenerateRequest(BaseModel):
     prompt: str = Field(..., description="The main topic or prompt for content generation")
     tone: str = Field("Creative", description="Tone of the response (e.g., Professional, Casual, Creative, Academic)")
@@ -25,6 +39,7 @@ class RewriteRequest(BaseModel):
 
 class HistoryItem(BaseModel):
     id: str = Field(..., alias="_id", description="MongoDB Document ID")
+    user_id: Optional[str] = Field(None, description="ID of the user who owns this history")
     prompt: str = Field(..., description="Original prompt / source text")
     type: str = Field(..., description="Tab type (generate, summarize, email, rewrite)")
     options: Dict[str, Any] = Field(default_factory=dict, description="Metadata options used for generation")

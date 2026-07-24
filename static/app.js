@@ -2,6 +2,7 @@
    WriteGen AI - Frontend Logic (Vanilla JS)
    ========================================================================== */
 
+console.log("JS file is loaded");
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements - Navigation & Sidebar
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -33,10 +34,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements - Notification
     const toastContainer = document.getElementById('notificationContainer');
 
+    // DOM Elements - Auth
+    const authModalOverlay = document.getElementById('authModalOverlay');
+    const closeAuthModal = document.getElementById('closeAuthModal');
+    const authForm = document.getElementById('authForm');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userProfile = document.getElementById('userProfile');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const authCtaContainer = document.getElementById('authCtaContainer');
+    const authToggleLink = document.getElementById('authToggleLink');
+    const nameGroup = document.getElementById('nameGroup');
+    const authModalTitle = document.getElementById('authModalTitle');
+
     // App State Variables
     let activeTab = 'generate';
     let isGenerating = false;
     let currentStreamReader = null;
+    let isLoginMode = true;
 
     // Initialize App
     initTheme();
@@ -125,6 +141,35 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('form-summarize').addEventListener('submit', (e) => handleFormSubmit(e, 'summarize'));
         document.getElementById('form-email').addEventListener('submit', (e) => handleFormSubmit(e, 'email'));
         document.getElementById('form-rewrite').addEventListener('submit', (e) => handleFormSubmit(e, 'rewrite'));
+
+        // Auth Listeners
+        if (showLoginBtn) showLoginBtn.addEventListener('click', () => authModalOverlay.style.display = 'flex');
+        if (closeAuthModal) closeAuthModal.addEventListener('click', () => authModalOverlay.style.display = 'none');
+        if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
+        if (authSubmitBtn) authSubmitBtn.addEventListener('click', () => console.log('Register button is clicked'));
+        if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+        
+        if (authToggleLink) {
+            authToggleLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                isLoginMode = !isLoginMode;
+                if (isLoginMode) {
+                    authModalTitle.textContent = 'Log In';
+                    nameGroup.style.display = 'none';
+                    document.getElementById('authName').removeAttribute('required');
+                    authSubmitBtn.querySelector('span').textContent = 'Log In';
+                    document.getElementById('authToggleText').textContent = "Don't have an account? ";
+                    authToggleLink.textContent = "Register here";
+                } else {
+                    authModalTitle.textContent = 'Register';
+                    nameGroup.style.display = 'flex';
+                    document.getElementById('authName').setAttribute('required', 'true');
+                    authSubmitBtn.querySelector('span').textContent = 'Register';
+                    document.getElementById('authToggleText').textContent = "Already have an account? ";
+                    authToggleLink.textContent = "Log In here";
+                }
+            });
+        }
     }
 
     /* ==========================================================================
@@ -206,9 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show loading overlays
             loadingOverlay.style.display = 'flex';
             
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(payload)
             });
 
@@ -286,8 +337,34 @@ document.addEventListener('DOMContentLoaded', () => {
        History Management
        ========================================================================== */
     async function loadHistory() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            if (authCtaContainer) authCtaContainer.style.display = 'block';
+            if (userProfile) userProfile.style.display = 'none';
+            historyList.innerHTML = `
+                <div class="empty-history">
+                    <i class="fa-solid fa-user-lock"></i>
+                    <p>Log in to view history.</p>
+                </div>
+            `;
+            historyCount.textContent = '0';
+            return;
+        }
+
+        if (authCtaContainer) authCtaContainer.style.display = 'none';
+        if (userProfile) {
+            userProfile.style.display = 'block';
+            userNameDisplay.textContent = localStorage.getItem('userName') || 'User';
+        }
+
         try {
-            const response = await fetch('/api/history');
+            const response = await fetch('/api/history', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.status === 401) {
+                handleLogout();
+                return;
+            }
             if (!response.ok) throw new Error('Failed to load history');
             const data = await response.json();
             
@@ -357,8 +434,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Are you sure you want to delete this prompt from your history?')) return;
         
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/history/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Could not delete history item');
             
@@ -512,5 +591,53 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    /* ==========================================================================
+       Auth Functions
+       ========================================================================== */
+    async function handleAuthSubmit(e) {
+        console.log("Form submit event fires");
+        e.preventDefault();
+        const email = document.getElementById('authEmail').value;
+        const password = document.getElementById('authPassword').value;
+        const name = document.getElementById('authName').value;
+
+        const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+        const payload = isLoginMode ? { email, password } : { email, password, name };
+
+        try {
+            console.log("fetch() is executed to endpoint:", endpoint);
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Authentication failed');
+            }
+
+            // Save token
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('userName', data.name);
+            
+            showToast(isLoginMode ? 'Logged in successfully' : 'Registered successfully', 'success');
+            authModalOverlay.style.display = 'none';
+            authForm.reset();
+            
+            // Reload history to apply logged in state
+            loadHistory();
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        showToast('Logged out successfully', 'info');
+        loadHistory();
     }
 });
