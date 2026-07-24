@@ -22,7 +22,7 @@ history_collection = None
 users_collection = None
 
 try:
-    client = AsyncIOMotorClient(MONGODB_URI)
+    client = AsyncIOMotorClient(MONGODB_URI, serverSelectionTimeoutMS=3000)
     db = client[DB_NAME]
     history_collection = db["history"]
     users_collection = db["users"]
