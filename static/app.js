@@ -4,6 +4,11 @@
 
 console.log("JS file is loaded");
 document.addEventListener('DOMContentLoaded', () => {
+    // API Configuration: Use custom Render URL if running in production (Vercel), otherwise fallback to empty string for localhost.
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? '' 
+        : 'https://writegen-backend-render.onrender.com'; // CHANGE THIS to your actual Render service URL once deployed!
+
     // DOM Elements - Navigation & Sidebar
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabForms = document.querySelectorAll('.tab-form');
@@ -257,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await fetch(apiEndpoint, {
+            const response = await fetch(`${API_BASE_URL}${apiEndpoint}`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(payload)
@@ -358,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/api/history', {
+            const response = await fetch(`${API_BASE_URL}/api/history`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.status === 401) {
@@ -435,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/history/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/history/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -608,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             console.log("fetch() is executed to endpoint:", endpoint);
-            const response = await fetch(endpoint, {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
