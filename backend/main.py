@@ -64,6 +64,14 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 async def favicon():
     return Response(status_code=204)
 
+@app.get("/style.css", include_in_schema=False)
+async def serve_css():
+    return FileResponse(os.path.join(static_path, "style.css"))
+
+@app.get("/app.js", include_in_schema=False)
+async def serve_js():
+    return FileResponse(os.path.join(static_path, "app.js"))
+
 @app.get("/")
 async def serve_frontend():
     """Serve the single-page application."""
