@@ -617,10 +617,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.detail || 'Authentication failed');
+                let errorMsg = 'Authentication failed';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.detail || errorMsg;
+                } catch (e) {
+                    errorMsg = `Server error (${response.status}): Database is likely offline or unreachable.`;
+                }
+                throw new Error(errorMsg);
             }
+
+            const data = await response.json();
 
             // Save token
             localStorage.setItem('token', data.access_token);
